@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VelMath — Toán 9</title>
+<style>
+:root{--bg:#0b1020;--panel:#111a2e;--card:#17233d;--card2:#243653;--text:#f8fafc;--muted:#9aabc3;--cyan:#38bdf8;--green:#22c55e;--red:#ef4444;--yellow:#facc15}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#172544,var(--bg) 65%);color:var(--text);font-family:Segoe UI,Arial,sans-serif;min-height:100vh;padding:22px}
+button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:12px 16px;font-weight:700;transition:.15s}button:hover:not(:disabled){transform:translateY(-1px);filter:brightness(1.1)}button:disabled{cursor:not-allowed;opacity:.45}
+.wrap{max-width:1000px;margin:auto}.panel{background:rgba(17,26,46,.96);border:1px solid #293956;border-radius:22px;padding:clamp(18px,4vw,34px);box-shadow:0 20px 60px #0005}
+h1{font-size:clamp(28px,5vw,42px);margin:5px 0}.sub{color:var(--cyan);font-weight:800;letter-spacing:1px}.muted{color:var(--muted)}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.stages{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:24px 0}.stage{min-height:112px;text-align:left;background:#20304b;color:white;border:1px solid #354967}.stage.unlocked{background:var(--stage-color);color:#07111f}.stage strong{display:block;font-size:17px;margin:5px 0}.stage small{font-size:13px}.btn-secondary{background:#2a3a55;color:white}.btn-danger{background:#452632;color:#fecaca}.hidden{display:none!important}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0}.stat{background:#0b1427;padding:12px;border-radius:12px;text-align:center}.stat b{display:block;font-size:clamp(17px,3vw,24px);color:var(--yellow);margin-top:4px}.bar{height:9px;background:#263449;border-radius:99px;overflow:hidden;margin:16px 0}#timebar{height:100%;width:100%;background:var(--green);transition:width .3s}.question{font-size:clamp(20px,3vw,28px);font-weight:750;line-height:1.45;text-align:center;margin:30px 0;white-space:pre-line}.answers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.answer{background:var(--card2);color:white;text-align:left;min-height:58px}.answer.correct{background:#166534}.answer.wrong{background:#7f1d1d}#message{min-height:32px;text-align:center;font-weight:800;margin:18px 0}.actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}.primary{background:var(--cyan);color:#07111f}.result{font-size:clamp(17px,3vw,23px);text-align:center;line-height:1.7;white-space:pre-line}@media(max-width:560px){body{padding:10px}.stats{grid-template-columns:repeat(2,1fr)}.answers{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<section id="menu" class="panel">
+<div class="sub">TRÍ TUỆ • NHANH NHẠY • CHUỖI ĐIỂM</div>
+<h1>🧠 VelMath — TOÁN 9</h1>
+<p class="muted">Chinh phục 7 màn thử thách. Mỗi màn tối đa 10 điểm; trả lời đúng ít nhất 50% để mở màn tiếp theo. Tiến trình được lưu trên trình duyệt này.</p>
+<div id="unlockText" class="muted"></div>
+<div id="stages" class="stages"></div>
+<div class="actions"><button id="reset" class="btn-danger">🗑️ Xóa tiến trình</button></div>
+</section>
+<section id="game" class="panel hidden">
+<div class="top"><div><div class="sub" id="stageTag">MÀN 1</div><h1 id="stageName">Khởi động</h1></div><button id="back" class="btn-secondary">☰ Menu</button></div>
+<div class="stats">
+<div class="stat">⭐ Điểm<b id="score">0 / 10</b></div>
+<div class="stat">📚 Câu<b id="qnum">1 / 5</b></div>
+<div class="stat">⏱️ Thời gian<b id="timer">90s</b></div>
+<div class="stat">🔥 Chuỗi đúng<b id="streak">0</b></div>
+</div>
+<div class="bar"><div id="timebar"></div></div>
+<div id="question" class="question"></div>
+<div id="answers" class="answers"></div>
+<div id="message"></div>
+<div id="result" class="result hidden"></div>
+<div class="actions"><button id="next" class="primary hidden">Câu tiếp theo →</button><button id="retry" class="primary hidden">🔄 Chơi lại màn</button><button id="nextStage" class="primary hidden">Màn tiếp theo →</button><button id="toMenu" class="btn-secondary hidden">Về menu</button></div>
+</section>
+</div>
+<script>
+const basicQuestions = [["Giải phương trình: 2x + 5 = 15", ["3", "5", "7", "10"], "5"], ["Giải phương trình: 3x - 6 = 12", ["4", "6", "8", "10"], "6"], ["Tính √81", ["7", "8", "9", "10"], "9"], ["Tính √49 + √16", ["9", "10", "11", "12"], "11"], ["Nếu y = 2x + 1 và x = 3 thì y bằng bao nhiêu?", ["5", "6", "7", "8"], "7"], ["Nghiệm của x² = 25 là:", ["x = 5", "x = -5", "x = ±5", "x = 25"], "x = ±5"], ["Một tam giác vuông có hai cạnh góc vuông 3 và 4. Cạnh huyền bằng:", ["5", "6", "7", "8"], "5"], ["Tính: (x + 2)(x - 2)", ["x² + 4", "x² - 4", "x² + 2", "x² - 2"], "x² - 4"], ["Nếu sin A = 1/2 và A là góc nhọn thì A bằng:", ["30°", "45°", "60°", "90°"], "30°"], ["Giải: x² - 9 = 0", ["x = 3", "x = -3", "x = ±3", "x = 9"], "x = ±3"], ["Hệ số góc của đường thẳng y = 3x - 2 là:", ["-2", "2", "3", "-3"], "3"], ["Tính √100 - √36", ["2", "4", "6", "8"], "4"], ["Phương trình x² - 5x + 6 = 0 có nghiệm:", ["1 và 6", "2 và 3", "-2 và -3", "3 và 4"], "2 và 3"], ["Nếu a = 3, b = 4 thì a² + b² bằng:", ["7", "12", "25", "49"], "25"], ["Diện tích hình tròn bán kính 3 cm, lấy π ≈ 3,14:", ["18,84", "28,26", "9,42", "37,68"], "28,26"], ["Giải phương trình: 2x - 7 = 9", ["6", "7", "8", "9"], "8"]];
+const advancedQuestions = [["Hệ nào KHÔNG phải hệ phương trình bậc nhất hai ẩn?", ["A. x-y=2; 2x+y=1", "B. 2x=0; x+5y=15", "C. x²-4y²=0; 3x+2y=7", "D. 2x-y=-5; 3y+15=0"], "C. x²-4y²=0; 3x+2y=7"], ["Nghiệm của hệ x+y=0; x+3y=4 là cặp nào?", ["A. (0; 1)", "B. (2; 2)", "C. (3; -3)", "D. (-2; 2)"], "D. (-2; 2)"], ["Giải hệ 3(x+y)+2(x-y)=6; (x+y)+3(x-y)=4. Nghiệm là:", ["A. (5/7; -1/7)", "B. (-8/7; 2/7)", "C. (8/7; -2/7)", "D. (-8/7; -2/7)"], "A. (5/7; -1/7)"], ["Thứ tự đúng khi lập hệ phương trình giải bài toán là:", ["A. (4), (1), (2), (3)", "B. (2), (4), (1), (3)", "C. (4), (2), (1), (3)", "D. (2), (4), (3), (1)"], "C. (4), (2), (1), (3)"], ["Kiểm tra điều kiện nghiệm khi giải bài toán bằng cách lập hệ là:", ["A. Kiểm tra các nghiệm tìm được có thỏa mãn điều kiện ẩn", "B. Chỉ kiểm tra một nghiệm bất kỳ", "C. Chỉ kiểm tra x≤15, y≤15", "D. Không cần kiểm tra"], "A. Kiểm tra các nghiệm tìm được có thỏa mãn điều kiện ẩn"], ["Phòng học có 200 ghế. Thêm 2 dãy, mỗi dãy thêm 1 ghế thì có 242 ghế. Ban đầu có:", ["A. 10 dãy, mỗi dãy 20 ghế", "B. 12 dãy, mỗi dãy 15 ghế", "C. 10 dãy, mỗi dãy 25 ghế", "D. 20 dãy, mỗi dãy 10 ghế"], "D. 20 dãy, mỗi dãy 10 ghế"], ["Phương trình 3(x-5)-2x(5-x)=0 đưa về dạng tích là:", ["A. (x-5)(3-2x)=0", "B. (x-5)(2x-3)=0", "C. (x-5)(3+2x)=0", "D. (5-x)(3-2x)=0"], "C. (x-5)(3+2x)=0"], ["Cho m>n. Kết luận nào đúng?", ["A. m+4<n+4", "B. m-4>n-4", "C. m-1<n-1", "D. n+1>m+1"], "B. m-4>n-4"], ["Số giờ làm việc tối thiểu là 8 giờ. Bất đẳng thức là:", ["A. t≥8", "B. t>8", "C. t=8", "D. t<8"], "A. t≥8"], ["Hệ số a, b của bất phương trình 6x−23≥0 là:", ["A. a=6; b=-23", "B. a=x; b=-23", "C. a=6; b=23", "D. a=6x; b=-23"], "A. a=6; b=-23"], ["Tính √3 × √16 × √14.", ["A. 4√35", "B. 4√40", "C. 4√42", "D. 4√48"], "C. 4√42"], ["Với góc nhọn α, khẳng định nào đúng?", ["A. 0<sinα<1 và 0<cosα<1", "B. -1<sinα<1 và -1<cosα<1", "C. -1<sinα<0 và -1<cosα<0", "D. -1≤sinα<0 và -1≤cosα<0"], "A. 0<sinα<1 và 0<cosα<1"], ["Trong tam giác vuông, khẳng định nào SAI?", ["A. tanα = cạnh đối/cạnh kề", "B. sinα = cạnh đối/cạnh huyền", "C. cotα = cạnh huyền/cạnh kề", "D. cosα = cạnh kề/cạnh huyền"], "C. cotα = cạnh huyền/cạnh kề"], ["Hình chữ nhật dài 30 m, rộng 10√3 m. Góc giữa đường chéo và chiều dài là:", ["A. 30°", "B. 45°", "C. 60°", "D. 75°"], "A. 30°"], ["Tam giác ABC vuông tại A, AC=20 cm, góc C=60°. Độ dài BC là:", ["A. 40 cm", "B. 40√3 cm", "C. 20√3 cm", "D. 20 cm"], "A. 40 cm"], ["Phần hình tròn giới hạn bởi một cung và hai bán kính gọi là:", ["A. Hình quạt tròn", "B. Hình vành khuyên", "C. Hình vành khăn", "D. Hình viên phân"], "A. Hình quạt tròn"], ["Đường thẳng a cách tâm O một khoảng OH>R. Quan hệ giữa a và đường tròn (O) là:", ["A. Tiếp xúc", "B. Cắt nhau", "C. Không cắt nhau", "D. Trùng nhau"], "C. Không cắt nhau"], ["Hai đường thẳng song song cách nhau 3 cm. Đường tròn tâm I nằm trên đường thứ nhất, bán kính 3,5 cm. Đường tròn với đường thứ hai:", ["A. Cắt nhau", "B. Tiếp xúc", "C. Không giao nhau", "D. Không xác định"], "A. Cắt nhau"]];
+const stages = [
+ {name:"KHỞI ĐỘNG",count:5,time:90,color:"#22c55e",level:0},
+ {name:"TĂNG TỐC",count:8,time:75,color:"#38bdf8",level:0},
+ {name:"BỨT PHÁ",count:8,time:60,color:"#a78bfa",level:1},
+ {name:"THỬ THÁCH",count:10,time:50,color:"#f97316",level:1},
+ {name:"CHUNG KẾT",count:16,time:40,color:"#ef4444",level:1},
+ {name:"CAO THỦ",count:10,time:55,color:"#e879f9",level:2},
+ {name:"THẦN ĐỒNG TOÁN",count:10,time:45,color:"#fbbf24",level:2}
+];
+const $ = id => document.getElementById(id);
+let unlocked = Math.max(1, Math.min(7, Number(localStorage.getItem("velmath_unlocked")||1)));
+let stageIndex=0, chosen=[], index=0, score=0, correct=0, wrong=0, streak=0, timeLeft=0, timerId=null, answered=false, ended=false;
+function saveUnlock(){localStorage.setItem("velmath_unlocked",String(unlocked));}
+function renderMenu(){
+ clearInterval(timerId); $("game").classList.add("hidden"); $("menu").classList.remove("hidden");
+ $("unlockText").textContent=`🔓 Đã mở khóa: Màn ${unlocked} / 7`;
+ $("stages").innerHTML="";
+ stages.forEach((s,i)=>{
+  const b=document.createElement("button"); b.className="stage"+(i<unlocked?" unlocked":""); b.style.setProperty("--stage-color",s.color); b.disabled=i+1>unlocked;
+  b.innerHTML=`${i+1>unlocked?"🔒":i===4?"🏆":i+1}<strong>MÀN ${i+1} — ${s.name}</strong><small>${s.count} câu • ${s.time} giây • tối đa 10 điểm</small>`;
+  b.onclick=()=>startStage(i); $("stages").appendChild(b);
+ });
+}
+function shuffle(arr){return [...arr].sort(()=>Math.random()-.5)}
+function startStage(i){
+ clearInterval(timerId); stageIndex=i; const st=stages[i];
+ let pool=i<2?basicQuestions:(i<5?[...basicQuestions,...advancedQuestions]:advancedQuestions);
+ chosen=shuffle(pool).slice(0,st.count);
+ // Màn 5 cần đủ 16 câu; các màn 6-7 có đúng 10 câu.
+ index=0;score=0;correct=0;wrong=0;streak=0;timeLeft=st.time;ended=false;
+ $("menu").classList.add("hidden");$("game").classList.remove("hidden");
+ $("stageTag").textContent=`MÀN ${i+1}`; $("stageName").textContent=st.name;
+ $("stageName").style.color=st.color;
+ $("result").classList.add("hidden");$("retry").classList.add("hidden");$("nextStage").classList.add("hidden");$("toMenu").classList.add("hidden");
+ $("next").classList.add("hidden");$("message").textContent="";
+ updateStats();renderQuestion();timerId=setInterval(tick,1000);
+}
+function updateStats(){
+ $("score").textContent=`${score.toLocaleString("vi-VN",{maximumFractionDigits:3})} / 10`;
+ $("qnum").textContent=`${Math.min(index+1,chosen.length)} / ${chosen.length}`;
+ $("timer").textContent=timeLeft+"s";$("streak").textContent=streak;
+ $("timebar").style.width=(timeLeft/stages[stageIndex].time*100)+"%";
+ $("timebar").style.background=timeLeft<=10?"#ef4444":timeLeft<=20?"#facc15":"#22c55e";
+}
+function renderQuestion(){
+ if(index>=chosen.length){finish();return}
+ answered=false;const q=chosen[index];$("question").textContent=q[0];$("message").textContent="";
+ $("answers").innerHTML="";
+ q[1].forEach((option,j)=>{
+  const b=document.createElement("button");b.className="answer";b.textContent=option;b.onclick=()=>answer(option,b);$("answers").appendChild(b);
+ });
+ $("next").classList.add("hidden");updateStats();
+}
+function answer(option,button){
+ if(answered||ended)return;answered=true;
+ const q=chosen[index],buttons=[...$("answers").querySelectorAll("button")];
+ buttons.forEach(b=>b.disabled=true);
+ if(option===q[2]){
+  correct++;streak++;const points=10/chosen.length;score=Math.min(10,Math.round((score+points)*1000)/1000);
+  button.classList.add("correct");$("message").style.color="#22c55e";
+  $("message").textContent=`✅ Chính xác! +${points.toLocaleString("vi-VN")} điểm`;
+ }else{
+  wrong++;streak=0;button.classList.add("wrong");
+  const right=buttons.find(b=>b.textContent===q[2]);if(right)right.classList.add("correct");
+  $("message").style.color="#f87171";$("message").textContent=`❌ Chưa đúng. Đáp án: ${q[2]}`;
+ }
+ updateStats();$("next").classList.remove("hidden");$("next").textContent=index===chosen.length-1?"Xem kết quả":"Câu tiếp theo →";
+}
+function tick(){
+ if(ended)return;timeLeft--;updateStats();if(timeLeft<=0)finish();
+}
+function finish(){
+ if(ended)return;ended=true;clearInterval(timerId);
+ const pct=Math.round(correct/chosen.length*100);const passed=pct>=50;
+ if(passed&&stageIndex+1<stages.length&&unlocked<stageIndex+2){unlocked=stageIndex+2;saveUnlock();}
+ $("question").textContent="";$("answers").innerHTML="";$("next").classList.add("hidden");
+ $("result").classList.remove("hidden");
+ const title=pct>=80?"🏆 XUẤT SẮC!":pct>=60?"👏 RẤT TỐT!":passed?"👍 ĐÃ VƯỢT QUA!":"💪 HÃY THỬ LẠI!";
+ $("result").textContent=`${title}\nMàn ${stageIndex+1}: ${stages[stageIndex].name}\nĐiểm: ${score.toLocaleString("vi-VN",{maximumFractionDigits:3})} / 10\nĐúng: ${correct}/${chosen.length} • Sai: ${wrong}\nTỷ lệ đúng: ${pct}%`;
+ $("message").textContent=passed?"🎉 Bạn đã hoàn thành màn!":"Chưa đạt 50%. Hãy thử lại nhé!";
+ $("retry").classList.remove("hidden");$("toMenu").classList.remove("hidden");
+ if(passed&&stageIndex<stages.length-1){$("nextStage").classList.remove("hidden");}
+ updateStats();
+}
+$("next").onclick=()=>{if(!answered)return;index++;renderQuestion();};
+$("retry").onclick=()=>startStage(stageIndex);
+$("nextStage").onclick=()=>startStage(stageIndex+1);
+$("toMenu").onclick=renderMenu;$("back").onclick=renderMenu;
+$("reset").onclick=()=>{if(confirm("Bạn có chắc muốn xóa toàn bộ tiến trình mở khóa?")){unlocked=1;saveUnlock();renderMenu();}};
+renderMenu();
+</script>
+</body>
+</html>
